@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.core import validators
 from django.db import models
+from django.contrib.postgres import fields as postgres_fields
 from rest_framework import serializers
 from rest_framework.settings import api_settings as rest_framework_settings
 
@@ -299,6 +300,11 @@ def decimal_field_type(field):
     return openapi.TYPE_NUMBER if decimal_as_float(field) else openapi.TYPE_STRING
 
 
+def array_field_type(field):
+    basic_type_info = get_basic_type_info(field.base_field)
+    return basic_type_info.get('type')
+
+
 model_field_to_basic_type = [
     (models.AutoField, (openapi.TYPE_INTEGER, None)),
     (models.BinaryField, (openapi.TYPE_STRING, openapi.FORMAT_BINARY)),
@@ -317,6 +323,7 @@ model_field_to_basic_type = [
     (models.TimeField, (openapi.TYPE_STRING, None)),
     (models.UUIDField, (openapi.TYPE_STRING, openapi.FORMAT_UUID)),
     (models.CharField, (openapi.TYPE_STRING, None)),
+    (postgres_fields.ArrayField, (array_field_type, None))
 ]
 
 ip_format = {'ipv4': openapi.FORMAT_IPV4, 'ipv6': openapi.FORMAT_IPV6}
